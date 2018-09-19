@@ -1,0 +1,92 @@
+$(document).ready(function () {
+    // Initialize Firebase
+    // var config = {
+    //     apiKey: "AIzaSyBvERkVPbEwau0IFpeC9hAAtHcAcn2M8cI",
+    //     authDomain: "trainschedules-94382.firebaseapp.com",
+    //     databaseURL: "https://trainschedules-94382.firebaseio.com",
+    //     projectId: "trainschedules-94382",
+    //     storageBucket: "",
+    //     messagingSenderId: "866501111005"
+    // };
+    // firebase.initializeApp(config);
+    // ################################################## //
+
+    
+    // Initialize Firebase
+    var config = {
+        apiKey: "AIzaSyDrFHFKV7N6rKBchxyGTeV5HV6pveDltfg",
+        authDomain: "uoftcodingbootcamp2018.firebaseapp.com",
+        databaseURL: "https://uoftcodingbootcamp2018.firebaseio.com",
+        projectId: "uoftcodingbootcamp2018",
+        storageBucket: "",
+        messagingSenderId: "63986299458"
+    };
+    firebase.initializeApp(config);
+
+    var database = firebase.database();
+
+    // On add train button click,
+    $("#add-train-btn").on("click", function (event) {
+        event.preventDefault();
+
+        // get the data from the input boxes and store it in a variable
+        var trainName = $("#Train-name-input").val().trim();
+        var destination = $("#destination-input").val().trim();
+        var firstTrain = moment($("#first-train-input").val().trim(), 'HH:mm').subtract(10, 'years').format('X');
+        var freq = $("#frequency-input").val().trim();
+
+        // create an object of add train input
+
+
+        // push the newTrain object to the database
+        database.ref().push({
+            name: trainName,
+            destination: destination,
+            firstTrain: firstTrain,
+            frequency: freq
+        });
+
+        // console the input values
+        console.log(trainName);
+        console.log(destination);
+        console.log(firstTrain);
+        console.log(freq);
+
+        // alert the user 
+        alert("Train successfully added");
+
+        // clear the input fields
+        $("#Train-name-input").val("");
+        $("#destination-input").val("");
+        $("#first-train-input").val("");
+        $("#frequency-input").val("");
+    })
+
+    // synching the database with the website
+    database.ref().on("child_added", function (childSnapshot, prevChildKey) {
+        console.log(childSnapshot.val());
+
+        var tName = childSnapshot.val().name;
+        var dest = childSnapshot.val().destination;
+        var fTrain = childSnapshot.val().firstTrain;
+        var tFreq = childSnapshot.val().frequency;
+
+        console.log(tName);
+        console.log(dest);
+        console.log(fTrain);
+        console.log(tFreq);
+
+        var remainder = moment().diff(moment.unix(fTrain), "minutes") % tFreq;
+        var minutes = tFreq - remainder;
+        var arrival = moment().add(minutes, 'm').format('hh:mm A');
+
+        console.log(remainder);
+        console.log(minutes);
+        console.log(arrival);
+
+        $("#trains-table").append("<tr><td>" + tName + "</td><td>" + dest + "</td><td>" +
+            tFreq + "</td><td>" + arrival + "</td><td>" + minutes + "</td>");
+    })
+
+
+})
